@@ -1,7 +1,7 @@
 create table youtube.public.channels
 (
 	id bigserial not null,
-	serial char(25) not null
+	serial char(24) not null
 );
 
 create unique index channels_id_uindex
