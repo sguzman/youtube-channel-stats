@@ -1,4 +1,0 @@
-grpcio
-psycopg2
-requests
-youtube-data-api
