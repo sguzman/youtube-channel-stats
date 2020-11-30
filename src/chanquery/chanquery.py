@@ -4,10 +4,13 @@ import logging
 import os
 import psycopg2
 
-from concurrent import futures
 
 import service_pb2
 import service_pb2_grpc
+
+from concurrent import futures
+from typing import List
+from typing import Tuple
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -25,14 +28,16 @@ class Server(service_pb2_grpc.GreeterServicer):
     def SayHello(self, request: service_pb2.HelloRequest, context) -> service_pb2.HelloReply:
         logging.info('Got Request')
         conn: psycopg2 = psycopg2.connect(user=self.user, password=self.passwd, host=self.host, port=self.port, database=self.db)
-        atexit.register(lambda: conn.close())
 
         size: int = 50 if request.size < 1 or request.size > 50 else request.size
         postgresql_select_query: str = f'SELECT id, serial FROM {self.table} ORDER BY random() LIMIT {size}'
         cursor = conn.cursor()
         cursor.execute(postgresql_select_query)
-        records = cursor.fetchall()
+
+        records: List[Tuple[int,str]] = cursor.fetchall()
         cursor.close()
+        conn.close()
+
         logging.info(f'Sending data: {records}')
         msg: service_pb2.HelloReply = service_pb2.HelloReply()
         for pair in records:
