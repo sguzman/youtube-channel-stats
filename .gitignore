@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .idea/
+service_pb2.py
+service_pb2_grpc.py
