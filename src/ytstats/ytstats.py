@@ -17,8 +17,6 @@ def get():
     stub: service_pb2_grpc.GreeterStub = service_pb2_grpc.GreeterStub(channel)
     response: service_pb2.HelloReply = stub.SayHello(service_pb2.HelloRequest(size=50))
     print("Greeter client received:", response.message)
-    response = stub.SayHello(service_pb2.HelloRequest(size=50))
-    print("Greeter client received: " + response.message)
 
 
 if __name__ == '__main__':
