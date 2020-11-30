@@ -3,21 +3,32 @@ import os
 import service_pb2
 import service_pb2_grpc
 
-from typing import Dict
-from typing import List
 from youtube_api import YouTubeDataAPI
 
-api: str = os.environ['APIKEY']
-port: int = int(os.environ['QUERYPORT'])
-addr: str = f'localhost:{port}'
-
-
-def get():
-    channel: grpc.Channel = grpc.insecure_channel(addr)
-    stub: service_pb2_grpc.GreeterStub = service_pb2_grpc.GreeterStub(channel)
-    response: service_pb2.HelloReply = stub.SayHello(service_pb2.HelloRequest(size=50))
-    print("Greeter client received:", response.message)
-
+api = os.environ['APIKEY']
+port = int(os.environ['QUERYPORT'])
+addr = f'localhost:{port}'
 
 if __name__ == '__main__':
-    get()
+    channel = grpc.insecure_channel(addr)
+    stub = service_pb2_grpc.GreeterStub(channel)
+    response = stub.SayHello(service_pb2.HelloRequest(size=50))
+    print("Greeter client received:", response.message)
+
+    chans = [x.message for x in response.message]
+    dict_chans= {}
+    for pair in response.message:
+        dict_chans[pair.message] = pair.id
+
+    yt = YouTubeDataAPI(api, verify_api_key=False, verbose=True)
+    body = yt.get_channel_metadata(channel_id=chans, parser=None, part=['statistics'])
+
+    stats = []
+    for s in body:
+        serial = s['id']
+        view = int(s['statistics']['viewCount'])
+        subs = int(s['statistics']['subscriberCount'])
+        vids = int(s['statistics']['videoCount'])
+        stats.append((dict_chans[serial], serial, view, subs, vids))
+
+    print(stats)
