@@ -22,12 +22,13 @@ class Server(service_pb2_grpc.GreeterServicer):
         self.db: str = os.environ['DB']
         self.table: str = os.environ['TABLE']
 
-    def SayHello(self, request, context) -> service_pb2.HelloReply:
+    def SayHello(self, request: service_pb2.HelloRequest, context) -> service_pb2.HelloReply:
         logging.info('Got Request')
         conn: psycopg2 = psycopg2.connect(user=self.user, password=self.passwd, host=self.host, port=self.port, database=self.db)
         atexit.register(lambda: conn.close())
 
-        postgresql_select_query: str = f'SELECT id, serial FROM {self.table} ORDER BY random() LIMIT 50'
+        size: int = 50 if request.size < 1 or request.size > 50 else request.size
+        postgresql_select_query: str = f'SELECT id, serial FROM {self.table} ORDER BY random() LIMIT {size}'
         cursor = conn.cursor()
         cursor.execute(postgresql_select_query)
         records = cursor.fetchall()
