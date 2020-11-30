@@ -1,34 +1,25 @@
+import grpc
 import os
+import service_pb2
+import service_pb2_grpc
 
 from typing import Dict
 from typing import List
 from youtube_api import YouTubeDataAPI
 
 api: str = os.environ['APIKEY']
+port: int = int(os.environ['QUERYPORT'])
+addr: str = f'localhost:{port}'
 
 
-def youtube(self, chans: List[str]) -> List[StatsData]:
-    from typing import Dict
-    from youtube_api import YouTubeDataAPI
-
-    yt: YouTubeDataAPI = YouTubeDataAPI(self.api, verify_api_key=False, verbose=True)
-    body: Dict = yt.get_channel_metadata(channel_id=chans, parser=None, part=['statistics'])
-
-    stats = []
-    for s in body:
-        serial: str = s['id']
-        view: int = int(s['statistics']['viewCount'])
-        subs: int = int(s['statistics']['subscriberCount'])
-        vids: int = int(s['statistics']['videoCount'])
-        stat_obj: YtStats.StatsData = YtStats.StatsData(serial, view, subs, vids)
-
-        stats.append(stat_obj)
-
-    return stats
+def get():
+    channel: grpc.Channel = grpc.insecure_channel(addr)
+    stub: service_pb2_grpc.GreeterStub = service_pb2_grpc.GreeterStub(channel)
+    response: service_pb2.HelloReply = stub.SayHello(service_pb2.HelloRequest(size=50))
+    print("Greeter client received:", response.message)
+    response = stub.SayHello(service_pb2.HelloRequest(size=50))
+    print("Greeter client received: " + response.message)
 
 
-def main() -> None:
-    YtStats.main()
-
-
-main()
+if __name__ == '__main__':
+    get()

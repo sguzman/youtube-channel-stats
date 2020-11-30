@@ -18,5 +18,5 @@ message HelloPacket {
 }
 
 message HelloReply {
-  HelloPacket message = 1;
+  repeated HelloPacket message = 1;
 }

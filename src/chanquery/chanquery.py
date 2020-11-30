@@ -35,10 +35,10 @@ class Server(service_pb2_grpc.GreeterServicer):
         logging.info(f'Sending data: {records}')
         msg: service_pb2.HelloReply = service_pb2.HelloReply()
         for pair in records:
-            packet: service_pb2.HelloPacket = msg.message.add()
+            packet: service_pb2.HelloPacket = service_pb2.HelloPacket()
             packet.id = pair[0]
             packet.message = pair[1]
-            msg = service_pb2.HelloReply
+            msg.message.append(packet)
 
         return msg
 
