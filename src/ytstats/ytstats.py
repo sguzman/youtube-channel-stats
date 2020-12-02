@@ -27,7 +27,10 @@ if __name__ == '__main__':
     for s in body:
         serial = s['id']
         view = int(s['statistics']['viewCount'])
-        subs = int(s['statistics']['subscriberCount'])
+        if s['statistics']['hiddenSubscriberCount']:
+            subs = 0
+        else:
+            subs = int(s['statistics']['subscriberCount'])
         vids = int(s['statistics']['videoCount'])
         stats.append((dict_chans[serial], serial, view, subs, vids))
 
