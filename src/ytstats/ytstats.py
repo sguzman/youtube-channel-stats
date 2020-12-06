@@ -46,4 +46,4 @@ if __name__ == '__main__':
     channel2 = grpc.insecure_channel(addr2)
     stub2 = writer_pb2_grpc.WriterStub(channel2)
     response2 = stub2.SayHello(request_body)
-    print("Greeter client received:", request_body)
+    print("Greeter client received:", response2)

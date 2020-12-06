@@ -4,7 +4,6 @@ import logging
 import os
 import psycopg2
 
-
 import service_pb2
 import service_pb2_grpc
 
@@ -17,29 +16,29 @@ logging.basicConfig(level=logging.DEBUG)
 
 class Server(service_pb2_grpc.GreeterServicer):
     def __init__(self):
-        self.host: str = os.environ['HOST']
-        self.port: str = os.environ['PORT']
-        self.user: str = os.environ['USER']
-        self.passwd: str = os.environ['PASS']
+        self.host = os.environ['HOST']
+        self.port = os.environ['PORT']
+        self.user = os.environ['USER']
+        self.passwd = os.environ['PASS']
 
-        self.db: str = os.environ['DB']
-        self.table: str = os.environ['TABLE']
+        self.db = os.environ['DB']
+        self.table = os.environ['TABLE']
 
-    def SayHello(self, request: service_pb2.HelloRequest, context) -> service_pb2.HelloReply:
+    def SayHello(self, request, context):
         logging.info('Got Request')
-        conn: psycopg2 = psycopg2.connect(user=self.user, password=self.passwd, host=self.host, port=self.port, database=self.db)
+        conn = psycopg2.connect(user=self.user, password=self.passwd, host=self.host, port=self.port, database=self.db)
 
-        size: int = 50 if request.size < 1 or request.size > 50 else request.size
-        postgresql_select_query: str = f'SELECT id, serial FROM {self.table} ORDER BY random() LIMIT {size}'
+        size = 50 if request.size < 1 or request.size > 50 else request.size
+        postgresql_select_query = f'SELECT id, serial FROM {self.table} ORDER BY random() LIMIT {size}'
         cursor = conn.cursor()
         cursor.execute(postgresql_select_query)
 
-        records: List[Tuple[int,str]] = cursor.fetchall()
+        records = cursor.fetchall()
         cursor.close()
         conn.close()
 
         logging.info(f'Sending data: {records}')
-        msg: service_pb2.HelloReply = service_pb2.HelloReply()
+        msg = service_pb2.HelloReply()
         for pair in records:
             packet: service_pb2.HelloPacket = service_pb2.HelloPacket()
             packet.id = pair[0]
@@ -50,7 +49,7 @@ class Server(service_pb2_grpc.GreeterServicer):
 
 
 def serve():
-    server_port: int = int(os.environ['SERVERPORT'])
+    server_port = int(os.environ['SERVERPORT'])
     logging.info(f'Server up at port {server_port}')
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
     service_pb2_grpc.add_GreeterServicer_to_server(Server(), server)
