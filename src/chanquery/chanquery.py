@@ -54,7 +54,7 @@ def serve():
     logging.info(f'Server up at port {server_port}')
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
     service_pb2_grpc.add_GreeterServicer_to_server(Server(), server)
-    server.add_insecure_port(f'[::]:{server_port}')
+    server.add_insecure_port(f'127.0.0.1:{server_port}')
     server.start()
     server.wait_for_termination()
 
